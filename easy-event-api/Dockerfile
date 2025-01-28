@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Installation de Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 # Configuration d'Apache
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
@@ -28,14 +28,19 @@ RUN a2enmod rewrite
 # Répertoire de travail
 WORKDIR /var/www/html
 
-# Copie des fichiers du projet
-COPY . .
-
-# Installation des dépendances
+# Copie et installation des dépendances PHP
+COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader
+
+# Copie et installation des dépendances Node.js
+COPY package.json package-lock.json ./
 RUN npm install && npm run build
 
+# Copie des fichiers restants
+COPY . .
+
 # Permissions pour storage et bootstrap/cache
+RUN mkdir -p storage bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
 
