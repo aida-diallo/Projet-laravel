@@ -1,0 +1,26 @@
+# render.yaml
+services:
+  - type: web
+    name: your-app-name
+    env: docker
+    buildCommand: docker build -t your-app-name .
+    startCommand: docker run -p $PORT:80 your-app-name
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
