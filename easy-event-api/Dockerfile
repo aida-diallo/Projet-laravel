@@ -23,15 +23,11 @@ WORKDIR /var/www/html
 # Copier les fichiers `composer.json` et `composer.lock` avant l'installation
 COPY composer.json composer.lock ./
 
-# Vérifier et installer les dépendances PHP avec Composer
-RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs -vvv
-
-# Copier le reste du projet après l’installation des dépendances (optimisation du cache Docker)
-COPY . .
-
 # Donner les permissions appropriées aux répertoires de cache Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
+RUN cp .env.example .env || true
+
 
 # Optimisation pour la production
 RUN php artisan config:cache && \
