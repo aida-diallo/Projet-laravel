@@ -29,14 +29,14 @@ RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs -vvv
 # Copier le reste du projet après l'installation des dépendances (optimisation du cache Docker)
 COPY . .
 
-# Copier .env.example vers .env si nécessaire
-RUN cp .env.example .env || true
+# Copier .env.example vers .env si nécessaire (avec une copie forcée)
+RUN cp .env .env || true
 
 # Donner les permissions appropriées aux répertoires de cache Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
 
-# Optimisation pour la production (après avoir copié tous les fichiers et configuré .env)
+# Générer la clé, configurer le cache et les routes
 RUN php artisan key:generate && \
     php artisan config:cache && \
     php artisan route:cache && \
