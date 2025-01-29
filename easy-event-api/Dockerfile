@@ -23,27 +23,19 @@ WORKDIR /var/www/html
 # Copier les fichiers `composer.json` et `composer.lock` avant l'installation
 COPY composer.json composer.lock ./
 
-# Installer les dépendances PHP avec Composer
-RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs -vvv
-
-# Copier le reste du projet après l'installation des dépendances (optimisation du cache Docker)
-COPY . .
-
-# Copier .env.example vers .env si nécessaire
-RUN cp .env.example .env || true
-
 # Donner les permissions appropriées aux répertoires de cache Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
+RUN cp .env.example .env || true
 
-# Optimisation pour la production (après avoir copié tous les fichiers et configuré .env)
-RUN php artisan key:generate && \
-    php artisan config:cache && \
+
+# Optimisation pour la production
+RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
 
-# Exposition du port 8000 pour Laravel (au lieu de 9000)
-EXPOSE 8000
+# Exposition du port 9000 pour PHP-FPM
+EXPOSE 9000
 
 # Copie du script d'entrée et attribution des permissions
 COPY docker-entrypoint.sh /usr/local/bin/
