@@ -1,5 +1,5 @@
 # Dockerfile
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
 # Installation des dépendances système
 RUN apt-get update && apt-get install -y \
@@ -9,37 +9,36 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip \
-    nodejs \
-    npm
+    unzip
 
 # Installation des extensions PHP
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Installation de Composer
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Configuration d'Apache
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-RUN a2enmod rewrite
-
-# Répertoire de travail
+# Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copie de tous les fichiers du projet
+# Copier les fichiers du projet
 COPY . .
 
-# Installation des dépendances PHP
-RUN composer install --no-dev --optimize-autoloader
+# Installation des dépendances
+RUN composer install --optimize-autoloader --no-dev
 
-# Installation des dépendances Node.js
-RUN npm install && npm run build
+# Optimisation pour la production
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
-# Permissions pour storage et bootstrap/cache
+# Permissions pour le stockage
 RUN chown -R www-data:www-data storage bootstrap/cache
-RUN chmod -R 775 storage bootstrap/cache
 
-# Port exposé
-EXPOSE 80
+# Exposition du port
+EXPOSE 8080
+
+# Script de démarrage
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
