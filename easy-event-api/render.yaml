@@ -18,19 +18,19 @@ services:
           property: url
 
       # Configuration de la base de données
-      - key: DB_CONNECTION
-        value: mysql
-      # Vous devrez créer une base de données sur Render ou utiliser un service externe
-      - key: DB_HOST
-        value: VOTRE_HOST_DB_RENDER
-      - key: DB_PORT
-        value: 3306
-      - key: DB_DATABASE
-        value: easy-event
-      - key: DB_USERNAME
-        value: VOTRE_USERNAME_RENDER
-      - key: DB_PASSWORD
-        sync: false
+     # Configuration de la base de données
+- key: DB_CONNECTION
+  value: pgsql        # Changé de mysql à pgsql car c'est PostgreSQL
+- key: DB_HOST
+  value: dpg-cud47ean91rc73eok6og-a
+- key: DB_PORT
+  value: 5432
+- key: DB_DATABASE
+  value: easy_event
+- key: DB_USERNAME
+  value: easy_event_user
+- key: DB_PASSWORD
+  sync: false        # Le mot de passe sera ajouté manuellement dans l'interface Render
 
       # Configuration mail
       - key: MAIL_MAILER
