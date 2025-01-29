@@ -28,19 +28,16 @@ RUN a2enmod rewrite
 # Répertoire de travail
 WORKDIR /var/www/html
 
-# Copie et installation des dépendances PHP
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
-
-# Copie et installation des dépendances Node.js
-COPY package.json package-lock.json ./
-RUN npm install && npm run build
-
-# Copie des fichiers restants
+# Copie de tous les fichiers du projet
 COPY . .
 
+# Installation des dépendances PHP
+RUN composer install --no-dev --optimize-autoloader
+
+# Installation des dépendances Node.js
+RUN npm install && npm run build
+
 # Permissions pour storage et bootstrap/cache
-RUN mkdir -p storage bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache
 RUN chmod -R 775 storage bootstrap/cache
 
