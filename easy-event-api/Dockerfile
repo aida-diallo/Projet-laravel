@@ -26,15 +26,12 @@ COPY composer.json composer.lock ./
 # Installer les dépendances PHP avec Composer
 RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs -vvv
 
-# Copier le reste du projet après l'installation des dépendances (optimisation du cache Docker)
+# Copier le reste du projet après l'installation des dépendances
 COPY . .
 
-# Copier .env.example vers .env si nécessaire (avec une copie forcée)
-RUN cp .env .env || true
-
-# Donner les permissions appropriées aux répertoires de cache Laravel
-RUN chown -R www-data:www-data storage bootstrap/cache
-RUN chmod -R 775 storage bootstrap/cache
+# Donner les permissions appropriées aux répertoires
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
 
 # Générer la clé, configurer le cache et les routes
 RUN php artisan key:generate && \
@@ -42,7 +39,7 @@ RUN php artisan key:generate && \
     php artisan route:cache && \
     php artisan view:cache
 
-# Exposition du port 8000 pour Laravel (au lieu de 9000)
+# Exposition du port 8000 pour Laravel
 EXPOSE 8000
 
 # Copie du script d'entrée et attribution des permissions
@@ -50,4 +47,4 @@ COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Définition du script d'entrée
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"] 
