@@ -26,12 +26,21 @@ COPY composer.json composer.lock ./
 # Installer les dépendances PHP avec Composer
 RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs -vvv
 
-# Copier le reste du projet après l'installation des dépendances
+# Copier le reste du projet et vérifier le contenu
 COPY . .
+RUN ls -la && \
+    pwd && \
+    echo "Checking for .env file:" && \
+    ls -la .env || echo ".env file not found"
+
+# Copier explicitement le .env
+COPY .env .env
+RUN ls -la .env
 
 # Donner les permissions appropriées aux répertoires
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod 644 .env
 
 # Générer la clé, configurer le cache et les routes
 RUN php artisan key:generate && \
@@ -47,4 +56,4 @@ COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Définition du script d'entrée
-ENTRYPOINT ["docker-entrypoint.sh"] 
+ENTRYPOINT ["docker-entrypoint.sh"]
